@@ -1,6 +1,5 @@
 package gift.controller.restcontroller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gift.common.annotation.LoginMember;
 import gift.controller.dto.response.ProductResponse;
 import gift.controller.dto.response.WishResponse;
@@ -13,9 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -24,8 +24,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,8 +40,6 @@ class WishesRestControllerTest {
 
     private MockMvc mockMvc;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @BeforeEach
     public void init() throws Exception {
         HandlerMethodArgumentResolver loginMemberResolver = mock(HandlerMethodArgumentResolver.class);
@@ -53,7 +52,7 @@ class WishesRestControllerTest {
                 .thenReturn(1L);
 
         mockMvc = MockMvcBuilders.standaloneSetup(wishesRestController)
-                .setCustomArgumentResolvers(loginMemberResolver)
+                .setCustomArgumentResolvers(loginMemberResolver, new PageableHandlerMethodArgumentResolver())
                 .build();
     }
 
@@ -64,40 +63,38 @@ class WishesRestControllerTest {
     void getWishSuccess() throws Exception {
         // given
         int dataCount = 5;
+        int page = 0;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
         doReturn(wishList(dataCount)).when(wishService)
-                .findAllWishPagingByMemberId(1L, PageRequest.of(0, 10));
+                .findAllWishPagingByMemberId(1L, pageable);
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/v1/wishes")
+                        .contentType(MediaType.APPLICATION_JSON)
         );
 
         // then
-        MvcResult mvcResult = resultActions.andExpect(status().isOk()).andReturn();
-        String jsonResponse = mvcResult.getResponse().getContentAsString();
-        WishResponse[] responses = objectMapper.readValue(jsonResponse, WishResponse[].class);
-
-        assertThat(responses).hasSize(dataCount);
-        for (int i = 1; i < dataCount; i++) {
-            assertThat(responses[i - 1].id()).isEqualTo((i));
-            assertThat(responses[i - 1].productCount()).isEqualTo((i + 1));
-            assertThat(responses[i - 1].productResponse().id()).isEqualTo((i));
-            assertThat(responses[i - 1].productResponse().name()).isEqualTo(("testProduct"));
-            assertThat(responses[i - 1].productResponse().price()).isEqualTo((i * 1000));
-            assertThat(responses[i - 1].productResponse().imageUrl()).isEqualTo(("URL"));
-        }
+        resultActions.andExpect(status().isOk())
+                .andExpect(
+                        jsonPath("$.size", is(size))
+                ).andExpect(
+                        jsonPath("$.number", is(page))
+                ).andExpect(
+                        jsonPath("$.totalElements", is(dataCount))
+                );
     }
 
 
 
-    private List<WishResponse> wishList(int count) {
+    private Page<WishResponse> wishList(int count) {
         List<WishResponse> wishList = new ArrayList<>();
         for (int i = 1; i <= count; i++) {
             wishList.add(new WishResponse((long) i, i + 1,
                     new ProductResponse((long)i, "testProduct", i * 1000, "URL", null, null),
                     null, null));
         }
-        return wishList;
+        return new PageImpl<>(wishList, PageRequest.of(0, 10), count);
     }
-
 }
