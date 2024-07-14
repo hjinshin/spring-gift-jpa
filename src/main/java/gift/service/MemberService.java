@@ -28,11 +28,13 @@ public class MemberService {
         memberRepository.save(member);
     }
 
+    @Transactional(readOnly = true)
     public Page<MemberResponse> findAllMemberPaging(Pageable pageable) {
         return memberRepository.findAll(pageable)
                 .map(MemberResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public MemberResponse findById(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(()->

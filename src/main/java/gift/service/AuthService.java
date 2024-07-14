@@ -6,6 +6,7 @@ import gift.model.Member;
 import gift.repository.MemberRepository;
 import gift.security.TokenProvider;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -17,6 +18,7 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public String signIn(SignInRequest request) {
         Member member = findEmailAndPassword(request);
         return tokenProvider.generateToken(member.getId(), member.getEmail(), member.getRole());

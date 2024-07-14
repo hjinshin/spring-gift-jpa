@@ -48,6 +48,7 @@ public class WishService {
         wishRepository.save(new Wish(member, productCount, product));
     }
 
+    @Transactional(readOnly = true)
     public Page<WishResponse> findAllWishPagingByMemberId(Long memberId, Pageable pageable) {
         return wishRepository.findAllByMemberIdFetchJoin(memberId, pageable)
                 .map(WishResponse::from);

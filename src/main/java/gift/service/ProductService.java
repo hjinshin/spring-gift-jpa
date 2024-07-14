@@ -18,11 +18,13 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
+    @Transactional(readOnly = true)
     public Page<ProductResponse> findAllProductPaging(Pageable pageable) {
         return productRepository.findAll(pageable)
                 .map(ProductResponse::from);
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse findById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() ->
