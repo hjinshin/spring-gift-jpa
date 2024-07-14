@@ -32,6 +32,7 @@ public class ProductService {
         return ProductResponse.from(product);
     }
 
+    @Transactional
     public Long save(ProductRequest request) {
         Product product = new Product(request.name(), request.price(), request.imageUrl());
         return productRepository.save(product).getId();

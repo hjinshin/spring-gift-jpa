@@ -20,6 +20,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public void signUp(String email, String password, Role role) {
         if (memberRepository.existsByEmail(email)) {
             throw new DuplicateDataException("Email already exists", "Duplicate Email");
@@ -50,6 +51,7 @@ public class MemberService {
         member.updateMember(request.email(), request.password(), request.role());
     }
 
+    @Transactional
     public void deleteById(Long id) {
         memberRepository.deleteById(id);
     }

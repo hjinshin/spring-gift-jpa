@@ -40,6 +40,7 @@ public class WishService {
         wish.updateWish(wish.getMember(), request.productCount(), wish.getProduct());
     }
 
+    @Transactional
     public void save(WishInsertRequest request, int productCount, Long memberId) {
         checkProductByProductId(request.productId());
         checkDuplicateWish(request.productId(), memberId);
@@ -54,6 +55,7 @@ public class WishService {
                 .map(WishResponse::from);
     }
 
+    @Transactional
     public void deleteByProductId(Long productId, Long memberId) {
         wishRepository.deleteByProductIdAndMemberId(productId, memberId);
     }
