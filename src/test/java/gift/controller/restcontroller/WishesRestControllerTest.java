@@ -1,6 +1,7 @@
 package gift.controller.restcontroller;
 
 import gift.common.annotation.LoginMember;
+import gift.controller.dto.response.PagingResponse;
 import gift.controller.dto.response.ProductResponse;
 import gift.controller.dto.response.WishResponse;
 import gift.service.WishService;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,7 +40,7 @@ class WishesRestControllerTest {
 
     @Mock
     private WishService wishService;
-
+    
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -66,8 +69,8 @@ class WishesRestControllerTest {
         int page = 0;
         int size = 10;
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
-        doReturn(wishList(dataCount)).when(wishService)
-                .findAllWishPagingByMemberId(1L, pageable);
+        given(wishService.findAllWishPagingByMemberId(any(), eq(pageable)))
+                .willReturn(wishList(dataCount));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -76,6 +79,7 @@ class WishesRestControllerTest {
         );
 
         // then
+        then(wishService).should().findAllWishPagingByMemberId(any(), eq(pageable));
         resultActions.andExpect(status().isOk())
                 .andExpect(
                         jsonPath("$.size", is(size))
@@ -88,13 +92,14 @@ class WishesRestControllerTest {
 
 
 
-    private Page<WishResponse> wishList(int count) {
+    private PagingResponse<WishResponse> wishList(int count) {
         List<WishResponse> wishList = new ArrayList<>();
         for (int i = 1; i <= count; i++) {
             wishList.add(new WishResponse((long) i, i + 1,
                     new ProductResponse((long)i, "testProduct", i * 1000, "URL", null, null),
                     null, null));
         }
-        return new PageImpl<>(wishList, PageRequest.of(0, 10), count);
+        Page<WishResponse> pages = new PageImpl<>(wishList, PageRequest.of(0, 10), count);
+        return PagingResponse.from(pages);
     }
 }

@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -34,8 +33,8 @@ public class ProductRestController {
     public ResponseEntity<PagingResponse<ProductResponse>> getProducts(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<ProductResponse> responses = productService.findAllProductPaging(pageable);
-        return ResponseEntity.ok().body(PagingResponse.from(responses));
+        PagingResponse<ProductResponse> responses = productService.findAllProductPaging(pageable);
+        return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping("/product/{id}")

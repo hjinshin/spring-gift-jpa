@@ -2,6 +2,7 @@ package gift.service;
 
 import gift.common.exception.EntityNotFoundException;
 import gift.controller.dto.request.ProductRequest;
+import gift.controller.dto.response.PagingResponse;
 import gift.controller.dto.response.ProductResponse;
 import gift.model.Product;
 import gift.repository.ProductRepository;
@@ -19,9 +20,10 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductResponse> findAllProductPaging(Pageable pageable) {
-        return productRepository.findAll(pageable)
+    public PagingResponse<ProductResponse> findAllProductPaging(Pageable pageable) {
+        Page<ProductResponse> pages = productRepository.findAll(pageable)
                 .map(ProductResponse::from);
+        return PagingResponse.from(pages);
     }
 
     @Transactional(readOnly = true)

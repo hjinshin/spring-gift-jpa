@@ -4,6 +4,7 @@ import gift.common.exception.DuplicateDataException;
 import gift.common.exception.EntityNotFoundException;
 import gift.controller.dto.request.WishInsertRequest;
 import gift.controller.dto.request.WishPatchRequest;
+import gift.controller.dto.response.PagingResponse;
 import gift.controller.dto.response.WishResponse;
 import gift.model.Member;
 import gift.model.Product;
@@ -50,9 +51,10 @@ public class WishService {
     }
 
     @Transactional(readOnly = true)
-    public Page<WishResponse> findAllWishPagingByMemberId(Long memberId, Pageable pageable) {
-        return wishRepository.findAllByMemberIdFetchJoin(memberId, pageable)
+    public PagingResponse<WishResponse> findAllWishPagingByMemberId(Long memberId, Pageable pageable) {
+        Page<WishResponse> pages = wishRepository.findAllByMemberIdFetchJoin(memberId, pageable)
                 .map(WishResponse::from);
+        return PagingResponse.from(pages);
     }
 
     @Transactional

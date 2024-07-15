@@ -1,11 +1,11 @@
 package gift.controller.admin;
 
 import gift.controller.dto.request.ProductRequest;
+import gift.controller.dto.response.PagingResponse;
 import gift.controller.dto.response.ProductResponse;
 import gift.service.ProductService;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ public class AdminProductController {
     @GetMapping("")
     public String getProducts(Model model,
               @PageableDefault(size = 10) Pageable pageable) {
-        Page<ProductResponse> products = productService.findAllProductPaging(pageable);
+        PagingResponse<ProductResponse> products = productService.findAllProductPaging(pageable);
         model.addAttribute("products", products);
         return "product/products";
     }

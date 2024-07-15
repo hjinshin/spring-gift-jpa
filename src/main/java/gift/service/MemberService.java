@@ -5,6 +5,7 @@ import gift.common.exception.DuplicateDataException;
 import gift.common.exception.EntityNotFoundException;
 import gift.controller.dto.request.MemberRequest;
 import gift.controller.dto.response.MemberResponse;
+import gift.controller.dto.response.PagingResponse;
 import gift.model.Member;
 import gift.repository.MemberRepository;
 import org.springframework.data.domain.Page;
@@ -30,9 +31,10 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Page<MemberResponse> findAllMemberPaging(Pageable pageable) {
-        return memberRepository.findAll(pageable)
+    public PagingResponse<MemberResponse> findAllMemberPaging(Pageable pageable) {
+        Page<MemberResponse> pages = memberRepository.findAll(pageable)
                 .map(MemberResponse::from);
+        return PagingResponse.from(pages);
     }
 
     @Transactional(readOnly = true)

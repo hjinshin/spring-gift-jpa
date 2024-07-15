@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -48,8 +47,8 @@ public class WishesRestController {
             @Parameter(hidden = true) @NotNull @LoginMember Long memberId,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<WishResponse> responses = wishService.findAllWishPagingByMemberId(memberId, pageable);
-        return ResponseEntity.ok().body(PagingResponse.from(responses));
+        PagingResponse<WishResponse> responses = wishService.findAllWishPagingByMemberId(memberId, pageable);
+        return ResponseEntity.ok().body(responses);
     }
 
     @PatchMapping("/{id}")
